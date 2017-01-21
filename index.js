@@ -24,28 +24,27 @@ const defaultProps = {
   fadeTime: 500,
   minOpacity: 0.0,
   maxOpacity: 0.9,
-  message: '',
 };
 
 class Notification extends Component {
   constructor(props) {
     super(props);
-
+		this.message = ''
     this.state = {
       opacityValue: new Animated.Value(this.props.minOpacity),
     };
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.message) {
-      this.fadeIn();
+	showMessage(message) {
+		if(this.message !== '') return
+		this.message = message
+		this.fadeIn();
 
-      const timerId = setTimeout(() => {
-        this.fadeOut();
-        clearTimeout(timerId);
-      }, this.props.timeout);
-    }
-  }
+		const timerId = setTimeout(() => {
+			this.fadeOut();
+			clearTimeout(timerId);
+		}, this.props.timeout);
+	}
 
   fadeIn = () => {
     Animated.timing(this.state.opacityValue, {
@@ -55,20 +54,23 @@ class Notification extends Component {
   }
 
   fadeOut = () => {
+		var self = this
     Animated.timing(this.state.opacityValue, {
       duration: this.props.fadeTime,
       toValue: this.props.minOpacity,
-    }).start();
+    }).start(() => {
+			self.message = null
+		});
   }
 
   render() {
-    if (this.props.message === '') {
+    if (this.message === '') {
       return null;
     }
 
     return (
       <Animated.View style={[Notification.styles.container, { opacity: this.state.opacityValue }]}>
-        <Text style={Notification.styles.message}>{this.props.message}</Text>
+        <Text style={Notification.styles.message}>{this.message}</Text>
       </Animated.View>
     );
   }
